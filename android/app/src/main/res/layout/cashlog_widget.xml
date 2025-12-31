@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="#00000000">
+
+    <Button
+        android:id="@+id/widget_add_button"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/widget_add_button"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:backgroundTint="#D7263D"
+        android:textColor="@android:color/white"
+        android:elevation="6dp" />
+
+</FrameLayout>

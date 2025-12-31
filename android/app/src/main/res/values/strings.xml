@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">cashlog</string>
+    <string name="widget_title">Quick expense</string>
+    <string name="widget_add_button">Expenses</string>
+    <string name="widget_prompt">Tap to add an expense without opening the app.</string>
+    <string name="widget_add_title">Add expense</string>
+    <string name="widget_description_hint">Description</string>
+    <string name="widget_amount_hint">Amount</string>
+    <string name="widget_save">Save</string>
+    <string name="widget_cancel">Cancel</string>
+    <string name="widget_saved_toast">Expense added</string>
+    <string name="widget_error_toast">Could not save expense</string>
+    <string name="widget_input_error">Please fill description and amount</string>
+    <string name="widget_amount_error">Enter a valid amount</string>
 </resources>

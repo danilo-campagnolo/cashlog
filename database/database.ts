@@ -21,9 +21,31 @@ export const createExpensesTable = async (db: SQLite.SQLiteDatabase) => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       description TEXT,
       amount REAL,
-      date TEXT
+      date TEXT,
+      type TEXT DEFAULT 'expense'
   );`;
   await db.executeSql(query);
+  await ensureTypeColumn(db);
+};
+
+const ensureTypeColumn = async (db: SQLite.SQLiteDatabase) => {
+  const results = await db.executeSql('PRAGMA table_info(Expenses)');
+  const columns = results?.[0]?.rows ?? null;
+  let hasType = false;
+  if (columns) {
+    for (let i = 0; i < columns.length; i++) {
+      const column = columns.item(i);
+      if (column?.name === 'type') {
+        hasType = true;
+        break;
+      }
+    }
+  }
+  if (!hasType) {
+    await db.executeSql(
+      "ALTER TABLE Expenses ADD COLUMN type TEXT DEFAULT 'expense'",
+    );
+  }
 };
 
 export const addExpense = async (
@@ -31,10 +53,12 @@ export const addExpense = async (
   description: string,
   amount: number,
   date: string,
+  type: 'income' | 'expense',
 ) => {
+  await ensureTypeColumn(db);
   const query =
-    'INSERT INTO Expenses (description, amount, date) VALUES (?, ?, ?)';
-  await db.executeSql(query, [description, amount, date]);
+    'INSERT INTO Expenses (description, amount, date, type) VALUES (?, ?, ?, ?)';
+  await db.executeSql(query, [description, amount, date, type]);
 };
 
 export const getExpenses = async (
@@ -45,7 +69,12 @@ export const getExpenses = async (
   let expenses: Expense[] = [];
   results.forEach(result => {
     for (let i = 0; i < result.rows.length; i++) {
-      expenses.push(result.rows.item(i));
+      const row = result.rows.item(i);
+      expenses.push({
+        ...row,
+        amount: Number(row.amount),
+        type: (row.type as 'income' | 'expense') ?? 'expense',
+      });
     }
   });
   return expenses;
@@ -57,10 +86,12 @@ export const updateExpense = async (
   description: string,
   amount: number,
   date: string,
+  type: 'income' | 'expense',
 ) => {
+  await ensureTypeColumn(db);
   const query =
-    'UPDATE Expenses SET description = ?, amount = ?, date = ? WHERE id = ?';
-  await db.executeSql(query, [description, amount, date, id]);
+    'UPDATE Expenses SET description = ?, amount = ?, date = ?, type = ? WHERE id = ?';
+  await db.executeSql(query, [description, amount, date, type, id]);
 };
 
 export const deleteExpense = async (db: SQLite.SQLiteDatabase, id: number) => {
