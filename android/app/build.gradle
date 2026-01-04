@@ -2,6 +2,25 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+import groovy.json.JsonSlurper
+
+/* Read version from package.json */
+def getVersionFromPackageJson() {
+    def packageJson = new JsonSlurper().parse(file("../../package.json"))
+    return packageJson.version
+}
+
+def appVersion = getVersionFromPackageJson()
+
+/* Convert version string to versionCode (e.g., 0.0.1 -> 1, 1.2.3 -> 10203) */
+def getVersionCode(String version) {
+    def parts = version.split('\\.')
+    def major = parts.length > 0 ? parts[0].toInteger() : 0
+    def minor = parts.length > 1 ? parts[1].toInteger() : 0
+    def patch = parts.length > 2 ? parts[2].toInteger() : 0
+    return major * 10000 + minor * 100 + patch
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -79,8 +98,8 @@ android {
         applicationId "com.cashlog"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode getVersionCode(appVersion)
+        versionName appVersion
     }
     signingConfigs {
         debug {
@@ -100,6 +119,14 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    /* Rename APK to cashlog-{version}.apk */
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def versionName = variant.versionName
+            outputFileName = "cashlog-${versionName}.apk"
         }
     }
 }

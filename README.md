@@ -1,79 +1,146 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Cashlog
 
-# Getting Started
+A simple and elegant expense tracker app built with React Native. Track your income and expenses with ease, view your balance at a glance, and quickly add transactions via the home screen widget.
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## Features
 
-## Step 1: Start the Metro Server
+- **Track Income & Expenses** - Easily log your financial transactions with description and amount
+- **Balance Overview** - View your total balance, income, and expenses in a beautiful card interface
+- **Dark Mode Support** - Automatic theme switching based on system preferences
+- **Home Screen Widget** - Quickly add expenses or income directly from your Android home screen without opening the app
+- **Deep Linking** - Widget buttons open the app with the transaction type pre-selected
+- **Offline First** - All data is stored locally using SQLite, no internet connection required
+- **Optimized Performance** - Built with performance in mind using React memoization and efficient database queries
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## Screenshots
 
-To start Metro, run the following command from the _root_ of your React Native project:
+<!-- Add screenshots here -->
+
+## Requirements
+
+- Node.js >= 18
+- React Native CLI
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+- JDK 17
+
+## Installation
+
+1. Clone the repository:
 
 ```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
+git clone https://github.com/yourusername/cashlog.git
+cd cashlog
 ```
 
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
+2. Install dependencies:
 
 ```bash
-# using npm
+npm install
+```
+
+3. Install iOS dependencies (macOS only):
+
+```bash
+cd ios && pod install && cd ..
+```
+
+4. Start the Metro bundler:
+
+```bash
+npm start
+```
+
+5. Run the app:
+
+```bash
+# Android
 npm run android
 
-# OR using Yarn
-yarn android
+# iOS
+npm run ios
 ```
 
-### For iOS
+## Usage
+
+### Adding a Transaction
+
+1. Open the app
+2. Select transaction type (Expense or Income)
+3. Enter a description
+4. Enter the amount
+5. Tap "Add Transaction"
+
+### Using the Widget (Android)
+
+1. Long press on your home screen
+2. Select "Widgets"
+3. Find "Cashlog" and drag it to your home screen
+4. Tap the red button to add an expense or the green button to add income
+5. The app will open with the transaction type pre-selected
+
+### Deleting a Transaction
+
+Tap the "Delete" button next to any transaction in the list to remove it.
+
+## Tech Stack
+
+- **React Native** - Cross-platform mobile framework
+- **TypeScript** - Type-safe JavaScript
+- **SQLite** - Local database storage
+- **Android Widget** - Native Android widget using Kotlin
+
+## Project Structure
+
+```
+cashlog/
+├── android/                 # Android native code
+│   └── app/src/main/
+│       ├── java/.../widget/ # Widget implementation
+│       └── res/             # Android resources
+├── database/                # Database layer
+│   └── database.ts          # SQLite operations
+├── src/
+│   ├── components/          # React components
+│   │   ├── BalanceCard.tsx
+│   │   ├── CustomButton.tsx
+│   │   ├── ExpenseForm.tsx
+│   │   └── ExpenseItem.tsx
+│   └── types/               # TypeScript types
+│       └── expense.ts
+├── App.tsx                  # Main app component
+└── package.json
+```
+
+## Building a Release
+
+To build a release APK:
 
 ```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+npm run build:android
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+Or with a clean build:
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+```bash
+npm run build:android:clean
+```
 
-## Step 3: Modifying your App
+The APK will be generated at:
+```
+android/app/build/outputs/apk/release/cashlog-{version}.apk
+```
 
-Now that you have successfully run the app, let's modify it.
+For example, version 0.0.1 will produce `cashlog-0.0.1.apk`.
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+### Versioning
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+The app version is managed in `package.json`. To release a new version:
 
-## Congratulations! :tada:
+1. Update the `version` field in `package.json`
+2. Run the build command
+3. The APK will be automatically named with the new version
 
-You've successfully run and modified your React Native App. :partying_face:
+## License
 
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
