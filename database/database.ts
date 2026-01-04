@@ -3,19 +3,31 @@ import type {Expense} from '../src/types/expense';
 
 SQLite.enablePromise(true);
 
-const database_name = 'test.db';
-// const database_version = '1.0';
-// const database_displayname = 'SQLite Test Database';
-// const database_size = 200000;
+const DATABASE_NAME = 'test.db';
 
-export const getDBConnection = async () => {
-  return SQLite.openDatabase({
-    name: database_name,
+/* Singleton database connection */
+let dbInstance: SQLite.SQLiteDatabase | null = null;
+let tableInitialized = false;
+
+export const getDBConnection = async (): Promise<SQLite.SQLiteDatabase> => {
+  if (dbInstance) {
+    return dbInstance;
+  }
+
+  dbInstance = await SQLite.openDatabase({
+    name: DATABASE_NAME,
     location: 'default',
   });
+
+  return dbInstance;
 };
 
 export const createExpensesTable = async (db: SQLite.SQLiteDatabase) => {
+  /* Skip if already initialized in this session */
+  if (tableInitialized) {
+    return;
+  }
+
   const query = `
   CREATE TABLE IF NOT EXISTS Expenses (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,6 +38,7 @@ export const createExpensesTable = async (db: SQLite.SQLiteDatabase) => {
   );`;
   await db.executeSql(query);
   await ensureTypeColumn(db);
+  tableInitialized = true;
 };
 
 const ensureTypeColumn = async (db: SQLite.SQLiteDatabase) => {
@@ -55,7 +68,6 @@ export const addExpense = async (
   date: string,
   type: 'income' | 'expense',
 ) => {
-  await ensureTypeColumn(db);
   const query =
     'INSERT INTO Expenses (description, amount, date, type) VALUES (?, ?, ?, ?)';
   await db.executeSql(query, [description, amount, date, type]);
@@ -64,19 +76,25 @@ export const addExpense = async (
 export const getExpenses = async (
   db: SQLite.SQLiteDatabase,
 ): Promise<Expense[]> => {
-  const query = 'SELECT * FROM Expenses';
+  /* Order by id DESC in SQL to avoid reversing in JS */
+  const query = 'SELECT * FROM Expenses ORDER BY id DESC';
   const results = await db.executeSql(query);
-  let expenses: Expense[] = [];
-  results.forEach(result => {
-    for (let i = 0; i < result.rows.length; i++) {
-      const row = result.rows.item(i);
+  const expenses: Expense[] = [];
+
+  if (results.length > 0) {
+    const rows = results[0].rows;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows.item(i);
       expenses.push({
-        ...row,
+        id: row.id,
+        description: row.description,
         amount: Number(row.amount),
+        date: row.date,
         type: (row.type as 'income' | 'expense') ?? 'expense',
       });
     }
-  });
+  }
+
   return expenses;
 };
 
@@ -88,7 +106,6 @@ export const updateExpense = async (
   date: string,
   type: 'income' | 'expense',
 ) => {
-  await ensureTypeColumn(db);
   const query =
     'UPDATE Expenses SET description = ?, amount = ?, date = ?, type = ? WHERE id = ?';
   await db.executeSql(query, [description, amount, date, type, id]);
@@ -99,6 +116,7 @@ export const deleteExpense = async (db: SQLite.SQLiteDatabase, id: number) => {
   await db.executeSql(query, [id]);
 };
 
-export const closeDB = async (db: SQLite.SQLiteDatabase) => {
-  await db.close();
+/* No-op: connection is kept open as singleton */
+export const closeDB = async (_db: SQLite.SQLiteDatabase) => {
+  /* Do nothing - we keep the connection open for the app lifetime */
 };

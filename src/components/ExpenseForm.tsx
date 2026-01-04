@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, memo, useCallback, useMemo} from 'react';
 import {
   View,
   TextInput,
@@ -15,6 +15,7 @@ interface ExpenseFormProps {
     amount: string,
     type: 'income' | 'expense',
   ) => void;
+  initialType?: 'income' | 'expense';
   editExpense?: {
     description: string;
     amount: number;
@@ -23,13 +24,18 @@ interface ExpenseFormProps {
   };
 }
 
+const TOGGLE_OPTIONS = ['expense', 'income'] as const;
+
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onAddExpense,
+  initialType = 'expense',
   editExpense,
 }) => {
   const [description, setDescription] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
+
+  const isDarkMode = useColorScheme() === 'dark';
 
   useEffect(() => {
     if (editExpense) {
@@ -39,84 +45,105 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
     }
   }, [editExpense]);
 
-  const handleAddExpense = () => {
+  useEffect(() => {
+    if (!editExpense) {
+      setType(initialType);
+    }
+  }, [initialType, editExpense]);
+
+  const handleAddExpense = useCallback(() => {
     if (description.trim() && amount.trim()) {
       onAddExpense(description.trim(), amount.trim(), type);
       setDescription('');
       setAmount('');
-      setType('expense');
+      setType(initialType);
     }
-  };
+  }, [description, amount, type, onAddExpense, initialType]);
 
-  const isDarkMode = useColorScheme() === 'dark';
+  const handleSetExpense = useCallback(() => setType('expense'), []);
+  const handleSetIncome = useCallback(() => setType('income'), []);
+
+  /* Memoize styles */
   const placeholderColor = isDarkMode ? '#64748B' : '#94A3B8';
+  const selectionColor = isDarkMode ? '#F97316' : '#0F172A';
+
+  const cardStyle = useMemo(
+    () => [
+      styles.card,
+      isDarkMode ? styles.cardDark : styles.cardLight,
+      styles.shadow,
+    ],
+    [isDarkMode],
+  );
+
+  const inputStyle = useMemo(
+    () => [styles.input, isDarkMode ? styles.inputDark : styles.inputLight],
+    [isDarkMode],
+  );
+
+  const buttonBackgroundColor = isDarkMode ? '#0F172A' : '#0F172A';
+
+  /* Memoize toggle buttons to prevent recreation */
+  const expenseToggleStyle = useMemo(() => {
+    const selected = type === 'expense';
+    return [
+      styles.toggle,
+      styles.toggleExpense,
+      selected
+        ? {backgroundColor: '#EF4444', borderColor: '#EF4444'}
+        : styles.toggleUnselected,
+    ];
+  }, [type]);
+
+  const incomeToggleStyle = useMemo(() => {
+    const selected = type === 'income';
+    return [
+      styles.toggle,
+      selected
+        ? {backgroundColor: '#22C55E', borderColor: '#22C55E'}
+        : styles.toggleUnselected,
+    ];
+  }, [type]);
+
+  const expenseTextStyle = useMemo(() => [
+    styles.toggleText,
+    {color: type === 'expense' ? '#fff' : isDarkMode ? '#CBD5E1' : '#64748B'},
+  ], [type, isDarkMode]);
+
+  const incomeTextStyle = useMemo(() => [
+    styles.toggleText,
+    {color: type === 'income' ? '#fff' : isDarkMode ? '#CBD5E1' : '#64748B'},
+  ], [type, isDarkMode]);
 
   return (
-    <View
-      style={[
-        styles.card,
-        isDarkMode ? styles.cardDark : styles.cardLight,
-        styles.shadow,
-      ]}>
+    <View style={cardStyle}>
       <View style={styles.toggleRow}>
-        {['expense', 'income'].map(option => {
-          const selected = type === option;
-          const isExpense = option === 'expense';
-          const activeColor = isExpense ? '#EF4444' : '#22C55E';
-
-          return (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.toggle,
-                {marginRight: isExpense ? 12 : 0},
-                selected
-                  ? {backgroundColor: activeColor, borderColor: activeColor}
-                  : styles.toggleUnselected,
-              ]}
-              onPress={() => setType(option as 'income' | 'expense')}>
-              <Text
-                style={[
-                  styles.toggleText,
-                  {
-                    color: selected
-                      ? '#fff'
-                      : isDarkMode
-                      ? '#CBD5E1'
-                      : '#64748B',
-                  },
-                ]}>
-                {isExpense ? 'Expense' : 'Income'}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+        <TouchableOpacity style={expenseToggleStyle} onPress={handleSetExpense}>
+          <Text style={expenseTextStyle}>Expense</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={incomeToggleStyle} onPress={handleSetIncome}>
+          <Text style={incomeTextStyle}>Income</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.inputContainer}>
         <TextInput
-          style={[
-            styles.input,
-            isDarkMode ? styles.inputDark : styles.inputLight,
-          ]}
+          style={inputStyle}
           value={description}
           placeholder="What is this for?"
           placeholderTextColor={placeholderColor}
-          selectionColor={isDarkMode ? '#F97316' : '#0F172A'}
+          selectionColor={selectionColor}
           onChangeText={setDescription}
         />
       </View>
 
       <View style={styles.inputContainer}>
         <TextInput
-          style={[
-            styles.input,
-            isDarkMode ? styles.inputDark : styles.inputLight,
-          ]}
+          style={inputStyle}
           value={amount}
           placeholder="0.00"
           placeholderTextColor={placeholderColor}
-          selectionColor={isDarkMode ? '#F97316' : '#0F172A'}
+          selectionColor={selectionColor}
           keyboardType="numeric"
           onChangeText={setAmount}
         />
@@ -127,7 +154,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           title="Add Transaction"
           onPress={handleAddExpense}
           textColor="#FFF"
-          backgroundColor={isDarkMode ? '#0F172A' : '#0F172A'}
+          backgroundColor={buttonBackgroundColor}
           style={styles.addButton}
         />
       </View>
@@ -165,6 +192,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  toggleExpense: {
+    marginRight: 12,
   },
   toggleUnselected: {
     borderColor: 'transparent',
@@ -205,4 +235,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ExpenseForm;
+export default memo(ExpenseForm);

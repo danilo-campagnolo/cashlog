@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo, useMemo} from 'react';
 import {View, Text, StyleSheet, useColorScheme} from 'react-native';
 
 interface BalanceCardProps {
@@ -14,25 +14,41 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
 
+  /* Memoize formatted values */
+  const formattedBalance = useMemo(() => `$${totalBalance.toFixed(2)}`, [totalBalance]);
+  const formattedIncome = useMemo(() => `$${totalIncome.toFixed(2)}`, [totalIncome]);
+  const formattedExpense = useMemo(() => `$${totalExpense.toFixed(2)}`, [totalExpense]);
+
+  /* Memoize styles */
+  const cardStyle = useMemo(
+    () => [
+      styles.card,
+      isDarkMode ? styles.cardDark : styles.cardLight,
+      styles.shadow,
+    ],
+    [isDarkMode],
+  );
+
+  const labelStyle = useMemo(
+    () => [styles.label, {color: isDarkMode ? '#94A3B8' : '#64748B'}],
+    [isDarkMode],
+  );
+
+  const balanceTextStyle = useMemo(
+    () => [styles.balanceText, {color: isDarkMode ? '#F8FAFC' : '#0F172A'}],
+    [isDarkMode],
+  );
+
+  const subLabelStyle = useMemo(
+    () => [styles.subLabel, {color: isDarkMode ? '#94A3B8' : '#64748B'}],
+    [isDarkMode],
+  );
+
   return (
-    <View
-      style={[
-        styles.card,
-        isDarkMode ? styles.cardDark : styles.cardLight,
-        styles.shadow,
-      ]}>
+    <View style={cardStyle}>
       <View style={styles.balanceContainer}>
-        <Text
-          style={[styles.label, {color: isDarkMode ? '#94A3B8' : '#64748B'}]}>
-          Total Balance
-        </Text>
-        <Text
-          style={[
-            styles.balanceText,
-            {color: isDarkMode ? '#F8FAFC' : '#0F172A'},
-          ]}>
-          ${totalBalance.toFixed(2)}
-        </Text>
+        <Text style={labelStyle}>Total Balance</Text>
+        <Text style={balanceTextStyle}>{formattedBalance}</Text>
       </View>
 
       <View style={styles.row}>
@@ -41,16 +57,8 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
             <Text style={styles.arrow}>↓</Text>
           </View>
           <View>
-            <Text
-              style={[
-                styles.subLabel,
-                {color: isDarkMode ? '#94A3B8' : '#64748B'},
-              ]}>
-              Income
-            </Text>
-            <Text style={[styles.amount, {color: '#22C55E'}]}>
-              ${totalIncome.toFixed(2)}
-            </Text>
+            <Text style={subLabelStyle}>Income</Text>
+            <Text style={styles.incomeAmount}>{formattedIncome}</Text>
           </View>
         </View>
 
@@ -59,16 +67,8 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
             <Text style={styles.arrow}>↑</Text>
           </View>
           <View>
-            <Text
-              style={[
-                styles.subLabel,
-                {color: isDarkMode ? '#94A3B8' : '#64748B'},
-              ]}>
-              Expense
-            </Text>
-            <Text style={[styles.amount, {color: '#EF4444'}]}>
-              ${totalExpense.toFixed(2)}
-            </Text>
+            <Text style={subLabelStyle}>Expense</Text>
+            <Text style={styles.expenseAmount}>{formattedExpense}</Text>
           </View>
         </View>
       </View>
@@ -118,16 +118,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    justifyContent: 'center', // Center content in column
+    justifyContent: 'center',
   },
   subLabel: {
     fontSize: 12,
     fontWeight: '500',
     marginBottom: 4,
   },
-  amount: {
+  incomeAmount: {
     fontSize: 18,
     fontWeight: '700',
+    color: '#22C55E',
+  },
+  expenseAmount: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#EF4444',
   },
   iconIncome: {
     width: 40,
@@ -153,4 +159,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BalanceCard;
+export default memo(BalanceCard);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo, useMemo} from 'react';
 import {
   TouchableOpacity,
   Text,
@@ -22,11 +22,19 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   backgroundColor = '#007BFF',
   style,
 }) => {
+  const buttonStyle = useMemo(
+    () => [styles.button, {backgroundColor}, style],
+    [backgroundColor, style],
+  );
+
+  const textStyle = useMemo(
+    () => [styles.buttonText, {color: textColor}],
+    [textColor],
+  );
+
   return (
-    <TouchableOpacity
-      style={[styles.button, {backgroundColor}, style]}
-      onPress={onPress}>
-      <Text style={[styles.buttonText, {color: textColor}]}>{title}</Text>
+    <TouchableOpacity style={buttonStyle} onPress={onPress}>
+      <Text style={textStyle}>{title}</Text>
     </TouchableOpacity>
   );
 };
@@ -44,4 +52,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomButton;
+export default memo(CustomButton);

@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">cashlog</string>
     <string name="widget_title">Quick expense</string>
-    <string name="widget_add_button">Expenses</string>
+    <string name="widget_add_expense_button">Add expense</string>
+    <string name="widget_add_income_button">Add income</string>
     <string name="widget_prompt">Tap to add an expense without opening the app.</string>
     <string name="widget_add_title">Add expense</string>
     <string name="widget_description_hint">Description</string>

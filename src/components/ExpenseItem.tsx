@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {memo, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,16 @@ import {
 } from 'react-native';
 
 type ExpenseItemProps = {
+  id: number;
   description: string;
   amount: number;
   date: string;
   type: 'income' | 'expense';
-  onDelete: () => void;
+  onDelete: (id: number) => void;
 };
 
 const ExpenseItem: React.FC<ExpenseItemProps> = ({
+  id,
   description,
   amount,
   date,
@@ -24,30 +26,57 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
   const isExpense = type === 'expense';
-  const formattedAmount = `${isExpense ? '-' : '+'}$${Math.abs(amount).toFixed(
-    2,
-  )}`;
+
+  /* Memoize formatted values */
+  const formattedAmount = useMemo(
+    () => `${isExpense ? '-' : '+'}$${Math.abs(amount).toFixed(2)}`,
+    [isExpense, amount],
+  );
+
+  const formattedDate = useMemo(
+    () => new Date(date).toLocaleDateString(),
+    [date],
+  );
+
+  /* Memoize delete handler to avoid creating new function on each render */
+  const handleDelete = useCallback(() => {
+    onDelete(id);
+  }, [onDelete, id]);
+
+  /* Memoize styles that depend on theme */
+  const cardStyle = useMemo(
+    () => [
+      styles.expenseItem,
+      isDarkMode ? styles.cardDark : styles.cardLight,
+      styles.shadow,
+    ],
+    [isDarkMode],
+  );
+
+  const titleStyle = useMemo(
+    () => [styles.title, {color: isDarkMode ? '#F3F4F6' : '#0F172A'}],
+    [isDarkMode],
+  );
+
+  const dateStyle = useMemo(
+    () => ({color: isDarkMode ? '#CBD5E1' : '#334155'}),
+    [isDarkMode],
+  );
+
+  const amountStyle = useMemo(
+    () => [styles.amount, {color: isExpense ? '#EF4444' : '#22C55E'}],
+    [isExpense],
+  );
 
   return (
-    <View
-      style={[
-        styles.expenseItem,
-        isDarkMode ? styles.cardDark : styles.cardLight,
-        styles.shadow,
-      ]}>
+    <View style={cardStyle}>
       <View style={styles.textBlock}>
-        <Text
-          style={[styles.title, {color: isDarkMode ? '#F3F4F6' : '#0F172A'}]}>
-          {description}
-        </Text>
-        <Text style={{color: isDarkMode ? '#CBD5E1' : '#334155'}}>{date}</Text>
+        <Text style={titleStyle}>{description}</Text>
+        <Text style={dateStyle}>{formattedDate}</Text>
       </View>
       <View style={styles.buttons}>
-        <Text
-          style={[styles.amount, {color: isExpense ? '#EF4444' : '#22C55E'}]}>
-          {formattedAmount}
-        </Text>
-        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+        <Text style={amountStyle}>{formattedAmount}</Text>
+        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
@@ -95,17 +124,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  editButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#007BFF',
-    borderRadius: 5,
-    marginRight: 8,
-  },
-  editButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
   deleteButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -118,4 +136,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ExpenseItem;
+/* Use React.memo to prevent re-renders when props haven't changed */
+export default memo(ExpenseItem);
