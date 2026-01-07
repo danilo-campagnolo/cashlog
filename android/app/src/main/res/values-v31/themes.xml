@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material You dynamic colors theme for Android 12+ -->
+<resources>
+    <!-- Widget theme with dynamic colors -->
+    <style name="Theme.Cashlog.Widget" parent="Theme.Material3.DynamicColors.DayNight">
+        <item name="android:colorBackground">@color/widget_background</item>
+    </style>
+</resources>

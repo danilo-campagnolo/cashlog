@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark mode color definitions for Cashlog -->
+<!-- These are fallback colors for Android < 12 in dark mode -->
+<resources>
+    <!-- Primary palette (dark mode) -->
+    <color name="colorPrimary">#F8FAFC</color>
+    <color name="colorPrimaryDark">#E2E8F0</color>
+    <color name="colorOnPrimary">#0F172A</color>
+    
+    <!-- Secondary palette (dark mode) -->
+    <color name="colorSecondary">#CBD5E1</color>
+    <color name="colorOnSecondary">#0F172A</color>
+    
+    <!-- Surface colors (dark mode) -->
+    <color name="colorSurface">#1E293B</color>
+    <color name="colorOnSurface">#F8FAFC</color>
+    <color name="colorSurfaceVariant">#334155</color>
+    <color name="colorOnSurfaceVariant">#94A3B8</color>
+    
+    <!-- Background (dark mode) -->
+    <color name="colorBackground">#0F172A</color>
+    <color name="colorOnBackground">#F8FAFC</color>
+    
+    <!-- Widget specific colors (dark mode fallback for < Android 12) -->
+    <color name="widget_background">#1E293B</color>
+    <color name="widget_button_primary">#F8FAFC</color>
+    <color name="widget_button_primary_text">#0F172A</color>
+    <color name="widget_button_secondary">@color/widget_button_primary</color>
+    <color name="widget_button_secondary_text">@color/widget_button_primary_text</color>
+
+    <!-- Launcher icon colors (dark mode fallback for < Android 12) -->
+    <color name="icon_foreground_primary">#F8FAFC</color>
+    <color name="icon_foreground_secondary">#0F172A</color>
+    <color name="icon_foreground_stroke">#0F172A</color>
+    <color name="icon_monochrome">#000000</color>
+</resources>

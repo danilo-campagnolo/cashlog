@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Centralized color definitions for Cashlog -->
+<!-- These are fallback colors for Android < 12 -->
+<resources>
+    <!-- Brand colors -->
+    <color name="ic_launcher_background">#0F172A</color>
+    
+    <!-- Primary palette -->
+    <color name="colorPrimary">#0F172A</color>
+    <color name="colorPrimaryDark">#020617</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    
+    <!-- Secondary palette -->
+    <color name="colorSecondary">#1E293B</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+    
+    <!-- Surface colors -->
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorOnSurface">#0F172A</color>
+    <color name="colorSurfaceVariant">#F1F5F9</color>
+    <color name="colorOnSurfaceVariant">#64748B</color>
+    
+    <!-- Background -->
+    <color name="colorBackground">#F1F5F9</color>
+    <color name="colorOnBackground">#0F172A</color>
+    
+    <!-- Semantic colors -->
+    <color name="colorIncome">#22C55E</color>
+    <color name="colorExpense">#EF4444</color>
+
+    <!-- Widget specific colors (fallback for < Android 12) -->
+    <color name="widget_background">#FFFFFF</color>
+    <color name="widget_button_primary">#0F172A</color>
+    <color name="widget_button_primary_text">#FFFFFF</color>
+    <color name="widget_button_secondary">@color/widget_button_primary</color>
+    <color name="widget_button_secondary_text">@color/widget_button_primary_text</color>
+
+    <!-- Launcher icon colors (fallback for < Android 12) -->
+    <color name="icon_foreground_primary">#FFFFFF</color>
+    <color name="icon_foreground_secondary">#1E293B</color>
+    <color name="icon_foreground_stroke">#1E293B</color>
+    <color name="icon_monochrome">#000000</color>
+</resources>

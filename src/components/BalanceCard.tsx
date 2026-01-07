@@ -1,5 +1,6 @@
 import React, {memo, useMemo} from 'react';
 import {View, Text, StyleSheet, useColorScheme} from 'react-native';
+import {Colors, formatCurrency, getColor} from '../constants';
 
 interface BalanceCardProps {
   totalBalance: number;
@@ -15,32 +16,32 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   const isDarkMode = useColorScheme() === 'dark';
 
   /* Memoize formatted values */
-  const formattedBalance = useMemo(() => `$${totalBalance.toFixed(2)}`, [totalBalance]);
-  const formattedIncome = useMemo(() => `$${totalIncome.toFixed(2)}`, [totalIncome]);
-  const formattedExpense = useMemo(() => `$${totalExpense.toFixed(2)}`, [totalExpense]);
+  const formattedBalance = useMemo(() => formatCurrency(totalBalance), [totalBalance]);
+  const formattedIncome = useMemo(() => formatCurrency(totalIncome), [totalIncome]);
+  const formattedExpense = useMemo(() => formatCurrency(totalExpense), [totalExpense]);
 
   /* Memoize styles */
   const cardStyle = useMemo(
     () => [
       styles.card,
-      isDarkMode ? styles.cardDark : styles.cardLight,
+      {backgroundColor: getColor(Colors.card, isDarkMode)},
       styles.shadow,
     ],
     [isDarkMode],
   );
 
   const labelStyle = useMemo(
-    () => [styles.label, {color: isDarkMode ? '#94A3B8' : '#64748B'}],
+    () => [styles.label, {color: getColor(Colors.text.tertiary, isDarkMode)}],
     [isDarkMode],
   );
 
   const balanceTextStyle = useMemo(
-    () => [styles.balanceText, {color: isDarkMode ? '#F8FAFC' : '#0F172A'}],
+    () => [styles.balanceText, {color: getColor(Colors.text.primary, isDarkMode)}],
     [isDarkMode],
   );
 
   const subLabelStyle = useMemo(
-    () => [styles.subLabel, {color: isDarkMode ? '#94A3B8' : '#64748B'}],
+    () => [styles.subLabel, {color: getColor(Colors.text.tertiary, isDarkMode)}],
     [isDarkMode],
   );
 
@@ -82,14 +83,8 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 24,
   },
-  cardDark: {
-    backgroundColor: '#1E293B',
-  },
-  cardLight: {
-    backgroundColor: '#FFFFFF',
-  },
   shadow: {
-    shadowColor: '#000',
+    shadowColor: Colors.shadow,
     shadowOpacity: 0.1,
     shadowRadius: 20,
     shadowOffset: {width: 0, height: 10},
@@ -128,18 +123,18 @@ const styles = StyleSheet.create({
   incomeAmount: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#22C55E',
+    color: Colors.income,
   },
   expenseAmount: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#EF4444',
+    color: Colors.expense,
   },
   iconIncome: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    backgroundColor: Colors.incomeLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -148,7 +143,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: Colors.expenseLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,

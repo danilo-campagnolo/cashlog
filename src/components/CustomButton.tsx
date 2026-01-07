@@ -6,6 +6,7 @@ import {
   ViewStyle,
   StyleProp,
 } from 'react-native';
+import {Colors} from '../constants';
 
 interface CustomButtonProps {
   title: string;
@@ -18,8 +19,8 @@ interface CustomButtonProps {
 const CustomButton: React.FC<CustomButtonProps> = ({
   title,
   onPress,
-  textColor = '#FFF',
-  backgroundColor = '#007BFF',
+  textColor = Colors.button.primary.text,
+  backgroundColor = Colors.button.primary.background,
   style,
 }) => {
   const buttonStyle = useMemo(

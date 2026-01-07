@@ -23,6 +23,7 @@ import {
 import ExpenseForm from './src/components/ExpenseForm';
 import ExpenseItem from './src/components/ExpenseItem';
 import BalanceCard from './src/components/BalanceCard';
+import {Colors, getColor} from './src/constants';
 import type {Expense} from './src/types/expense';
 
 /* Memoized header component to prevent unnecessary re-renders */
@@ -43,7 +44,7 @@ const ListHeader = memo(({
 }) => (
   <>
     <View style={styles.header}>
-      <Text style={[styles.title, {color: isDarkMode ? '#E5E7EB' : '#0F172A'}]}>
+      <Text style={[styles.title, {color: getColor(Colors.text.primary, isDarkMode)}]}>
         Cashlog
       </Text>
     </View>
@@ -59,7 +60,7 @@ const ListHeader = memo(({
       initialType={defaultType}
     />
 
-    <Text style={[styles.sectionTitle, {color: isDarkMode ? '#CBD5E1' : '#334155'}]}>
+    <Text style={[styles.sectionTitle, {color: getColor(Colors.text.secondary, isDarkMode)}]}>
       Recent Transactions
     </Text>
   </>
@@ -74,7 +75,7 @@ function App(): React.JSX.Element {
 
   /* Memoize background style to prevent object recreation */
   const backgroundStyle = useMemo(() => ({
-    backgroundColor: isDarkMode ? '#0F172A' : '#F1F5F9',
+    backgroundColor: getColor(Colors.background, isDarkMode),
     flex: 1,
   }), [isDarkMode]);
 

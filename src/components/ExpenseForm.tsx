@@ -8,6 +8,7 @@ import {
   Text,
 } from 'react-native';
 import CustomButton from './CustomButton';
+import {Colors, getColor} from '../constants';
 
 interface ExpenseFormProps {
   onAddExpense: (
@@ -23,8 +24,6 @@ interface ExpenseFormProps {
     type: 'income' | 'expense';
   };
 }
-
-const TOGGLE_OPTIONS = ['expense', 'income'] as const;
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onAddExpense,
@@ -64,24 +63,29 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const handleSetIncome = useCallback(() => setType('income'), []);
 
   /* Memoize styles */
-  const placeholderColor = isDarkMode ? '#64748B' : '#94A3B8';
-  const selectionColor = isDarkMode ? '#F97316' : '#0F172A';
+  const placeholderColor = getColor(Colors.input.placeholder, isDarkMode);
+  const selectionColor = getColor(Colors.selection, isDarkMode);
 
   const cardStyle = useMemo(
     () => [
       styles.card,
-      isDarkMode ? styles.cardDark : styles.cardLight,
+      {backgroundColor: getColor(Colors.card, isDarkMode)},
       styles.shadow,
     ],
     [isDarkMode],
   );
 
   const inputStyle = useMemo(
-    () => [styles.input, isDarkMode ? styles.inputDark : styles.inputLight],
+    () => [
+      styles.input,
+      {
+        backgroundColor: getColor(Colors.input.background, isDarkMode),
+        borderColor: getColor(Colors.input.border, isDarkMode),
+        color: getColor(Colors.text.primary, isDarkMode),
+      },
+    ],
     [isDarkMode],
   );
-
-  const buttonBackgroundColor = isDarkMode ? '#0F172A' : '#0F172A';
 
   /* Memoize toggle buttons to prevent recreation */
   const expenseToggleStyle = useMemo(() => {
@@ -90,7 +94,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       styles.toggle,
       styles.toggleExpense,
       selected
-        ? {backgroundColor: '#EF4444', borderColor: '#EF4444'}
+        ? {backgroundColor: Colors.expense, borderColor: Colors.expense}
         : styles.toggleUnselected,
     ];
   }, [type]);
@@ -100,19 +104,19 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
     return [
       styles.toggle,
       selected
-        ? {backgroundColor: '#22C55E', borderColor: '#22C55E'}
+        ? {backgroundColor: Colors.income, borderColor: Colors.income}
         : styles.toggleUnselected,
     ];
   }, [type]);
 
   const expenseTextStyle = useMemo(() => [
     styles.toggleText,
-    {color: type === 'expense' ? '#fff' : isDarkMode ? '#CBD5E1' : '#64748B'},
+    {color: type === 'expense' ? Colors.white : getColor(Colors.text.tertiary, isDarkMode)},
   ], [type, isDarkMode]);
 
   const incomeTextStyle = useMemo(() => [
     styles.toggleText,
-    {color: type === 'income' ? '#fff' : isDarkMode ? '#CBD5E1' : '#64748B'},
+    {color: type === 'income' ? Colors.white : getColor(Colors.text.tertiary, isDarkMode)},
   ], [type, isDarkMode]);
 
   return (
@@ -153,8 +157,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         <CustomButton
           title="Add Transaction"
           onPress={handleAddExpense}
-          textColor="#FFF"
-          backgroundColor={buttonBackgroundColor}
+          textColor={Colors.button.primary.text}
+          backgroundColor={Colors.button.primary.background}
           style={styles.addButton}
         />
       </View>
@@ -168,14 +172,8 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 24,
   },
-  cardDark: {
-    backgroundColor: '#1E293B',
-  },
-  cardLight: {
-    backgroundColor: '#FFFFFF',
-  },
   shadow: {
-    shadowColor: '#000',
+    shadowColor: Colors.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 24,
     shadowOffset: {width: 0, height: 8},
@@ -197,8 +195,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   toggleUnselected: {
-    borderColor: 'transparent',
-    backgroundColor: 'transparent',
+    borderColor: Colors.transparent,
+    backgroundColor: Colors.transparent,
   },
   toggleText: {
     fontWeight: '700',
@@ -215,16 +213,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  inputDark: {
-    borderColor: '#334155',
-    color: '#F8FAFC',
-    backgroundColor: '#0F172A',
-  },
-  inputLight: {
-    borderColor: '#E2E8F0',
-    backgroundColor: '#F8FAFC',
-    color: '#0F172A',
-  },
   buttonRow: {
     marginTop: 8,
   },
@@ -232,6 +220,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 56,
     borderRadius: 16,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
