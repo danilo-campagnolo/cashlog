@@ -26,7 +26,7 @@
             android:textStyle="bold"
             android:gravity="center"
             android:background="@drawable/widget_button_primary"
-            android:alpha="0.6" />
+            android:alpha="0.8" />
 
         <!-- Add income button -->
         <TextView
@@ -41,7 +41,7 @@
             android:textStyle="bold"
             android:gravity="center"
             android:background="@drawable/widget_button_secondary"
-            android:alpha="0.6" />
+            android:alpha="0.8" />
 
     </LinearLayout>
 
