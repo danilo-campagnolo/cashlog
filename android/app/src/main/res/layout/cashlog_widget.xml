@@ -25,7 +25,8 @@
             android:textSize="14sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="@drawable/widget_button_primary" />
+            android:background="@drawable/widget_button_primary"
+            android:alpha="0.6" />
 
         <!-- Add income button -->
         <TextView
@@ -39,7 +40,8 @@
             android:textSize="14sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:background="@drawable/widget_button_secondary" />
+            android:background="@drawable/widget_button_secondary"
+            android:alpha="0.6" />
 
     </LinearLayout>
 
