@@ -46,10 +46,10 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   );
 
   return (
-    <View style={cardStyle}>
+    <View testID="balance-card" style={cardStyle}>
       <View style={styles.balanceContainer}>
         <Text style={labelStyle}>Total Balance</Text>
-        <Text style={balanceTextStyle}>{formattedBalance}</Text>
+        <Text testID="balance-amount" style={balanceTextStyle}>{formattedBalance}</Text>
       </View>
 
       <View style={styles.row}>
@@ -59,7 +59,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           </View>
           <View>
             <Text style={subLabelStyle}>Income</Text>
-            <Text style={styles.incomeAmount}>{formattedIncome}</Text>
+            <Text testID="income-amount" style={styles.incomeAmount}>{formattedIncome}</Text>
           </View>
         </View>
 
@@ -69,7 +69,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
           </View>
           <View>
             <Text style={subLabelStyle}>Expense</Text>
-            <Text style={styles.expenseAmount}>{formattedExpense}</Text>
+            <Text testID="expense-amount" style={styles.expenseAmount}>{formattedExpense}</Text>
           </View>
         </View>
       </View>

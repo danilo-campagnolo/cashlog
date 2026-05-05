@@ -120,18 +120,19 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   ], [type, isDarkMode]);
 
   return (
-    <View style={cardStyle}>
+    <View testID="expense-form" style={cardStyle}>
       <View style={styles.toggleRow}>
-        <TouchableOpacity style={expenseToggleStyle} onPress={handleSetExpense}>
+        <TouchableOpacity testID="toggle-expense" style={expenseToggleStyle} onPress={handleSetExpense}>
           <Text style={expenseTextStyle}>Expense</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={incomeToggleStyle} onPress={handleSetIncome}>
+        <TouchableOpacity testID="toggle-income" style={incomeToggleStyle} onPress={handleSetIncome}>
           <Text style={incomeTextStyle}>Income</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.inputContainer}>
         <TextInput
+          testID="input-description"
           style={inputStyle}
           value={description}
           placeholder="What is this for?"
@@ -143,6 +144,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
       <View style={styles.inputContainer}>
         <TextInput
+          testID="input-amount"
           style={inputStyle}
           value={amount}
           placeholder="0.00"
@@ -155,6 +157,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
       <View style={styles.buttonRow}>
         <CustomButton
+          testID="button-add-transaction"
           title="Add Transaction"
           onPress={handleAddExpense}
           textColor={Colors.button.primary.text}

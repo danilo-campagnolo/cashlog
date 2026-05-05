@@ -14,6 +14,7 @@ interface CustomButtonProps {
   textColor?: string;
   backgroundColor?: string;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -22,6 +23,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   textColor = Colors.button.primary.text,
   backgroundColor = Colors.button.primary.background,
   style,
+  testID,
 }) => {
   const buttonStyle = useMemo(
     () => [styles.button, {backgroundColor}, style],
@@ -34,7 +36,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   );
 
   return (
-    <TouchableOpacity style={buttonStyle} onPress={onPress}>
+    <TouchableOpacity testID={testID} style={buttonStyle} onPress={onPress}>
       <Text style={textStyle}>{title}</Text>
     </TouchableOpacity>
   );

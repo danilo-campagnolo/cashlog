@@ -44,7 +44,7 @@ const ListHeader = memo(({
 }) => (
   <>
     <View style={styles.header}>
-      <Text style={[styles.title, {color: getColor(Colors.text.primary, isDarkMode)}]}>
+      <Text testID="app-title" style={[styles.title, {color: getColor(Colors.text.primary, isDarkMode)}]}>
         Cashlog
       </Text>
     </View>
@@ -243,6 +243,7 @@ function App(): React.JSX.Element {
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 
         <FlatList
+          testID="transaction-list"
           data={expenses}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
