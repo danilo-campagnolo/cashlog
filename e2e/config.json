@@ -3,6 +3,9 @@
   "testRunner": "jest-circus/runner",
   "testTimeout": 120000,
   "testRegex": "\\.e2e\\.ts$",
+  "transform": {
+    "^.+\\.(ts|tsx|js|jsx)$": ["babel-jest", {"presets": ["module:@react-native/babel-preset"]}]
+  },
   "reporters": [
     "detox/runners/jest/reporter"
   ],
