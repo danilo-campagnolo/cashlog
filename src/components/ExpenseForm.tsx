@@ -100,6 +100,23 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const handleSetExpense = useCallback(() => setType('expense'), []);
   const handleSetIncome = useCallback(() => setType('income'), []);
 
+  const chipStyle = useMemo(
+    () => ({
+      ...styles.chip,
+      backgroundColor:
+        type === 'income' ? Colors.incomeLight : Colors.expenseLight,
+    }),
+    [type],
+  );
+
+  const chipTextStyle = useMemo(
+    () => ({
+      ...styles.chipText,
+      color: type === 'income' ? Colors.income : Colors.expense,
+    }),
+    [type],
+  );
+
   /* Memoize styles */
   const placeholderColor = getColor(Colors.input.placeholder, isDarkMode);
   const selectionColor = getColor(Colors.selection, isDarkMode);
@@ -211,9 +228,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             {filteredSuggestions.map(s => (
               <TouchableOpacity
                 key={s}
-                style={styles.chip}
+                style={chipStyle}
                 onPress={() => handleSuggestionPress(s)}>
-                <Text style={styles.chipText}>{s}</Text>
+                <Text style={chipTextStyle}>{s}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
