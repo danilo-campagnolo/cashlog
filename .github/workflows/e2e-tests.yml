@@ -49,6 +49,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-detox-build-
 
+      - name: Install system dependencies
+        run: sudo apt-get install -y libpulse0
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -81,11 +84,6 @@ jobs:
           disable-animations: true
           script: echo "Generated AVD snapshot for caching."
 
-      - name: Build Android Debug APK
-        run: |
-          cd android
-          ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug
-
       - name: Build Detox
         run: npm run test:e2e:build
 
@@ -100,7 +98,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            npm run test:e2e:ci
+            npm run test:e2e
 
       - name: Upload test artifacts on failure
         if: failure()
