@@ -128,11 +128,13 @@ android {
         }
     }
 
-    /* Rename APK to cashlog-{version}.apk */
+    /* Rename release APK to cashlog-{version}.apk */
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
-            def versionName = variant.versionName
-            outputFileName = "cashlog-${versionName}.apk"
+            if (variant.buildType.name == "release") {
+                def versionName = variant.versionName
+                outputFileName = "cashlog-${versionName}.apk"
+            }
         }
     }
 }
