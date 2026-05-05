@@ -45,7 +45,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   const [description, setDescription] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
-  const [descriptionFocused, setDescriptionFocused] = useState(false);
   const descriptionRef = useRef<TextInput>(null);
 
   const isDarkMode = useColorScheme() === 'dark';
@@ -73,9 +72,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   }, [focusTrigger]);
 
   const filteredSuggestions = useMemo(() => {
-    if (!descriptionFocused) {
-      return [];
-    }
     const trimmed = description.trim().toLowerCase();
     if (!trimmed) {
       return suggestions.slice(0, 5);
@@ -85,19 +81,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
         s => s.toLowerCase().includes(trimmed) && s.toLowerCase() !== trimmed,
       )
       .slice(0, 5);
-  }, [description, descriptionFocused, suggestions]);
-
-  const handleDescriptionFocus = useCallback(
-    () => setDescriptionFocused(true),
-    [],
-  );
-  const handleDescriptionBlur = useCallback(() => {
-    setTimeout(() => setDescriptionFocused(false), 150);
-  }, []);
+  }, [description, suggestions]);
 
   const handleSuggestionPress = useCallback((s: string) => {
     setDescription(s);
-    setDescriptionFocused(false);
   }, []);
 
   const handleAddExpense = useCallback(() => {
@@ -212,8 +199,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           placeholderTextColor={placeholderColor}
           selectionColor={selectionColor}
           onChangeText={setDescription}
-          onFocus={handleDescriptionFocus}
-          onBlur={handleDescriptionBlur}
         />
         {filteredSuggestions.length > 0 && (
           <ScrollView

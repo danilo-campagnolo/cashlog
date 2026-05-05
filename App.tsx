@@ -259,8 +259,9 @@ function App(): React.JSX.Element {
   const handleClearAll = useCallback(async () => {
     const db = await getDBConnection();
     await deleteAllExpenses(db);
+    const topDescriptions = await getTopDescriptions(db);
     setExpenses([]);
-    setSuggestions([]);
+    setSuggestions(topDescriptions);
     await closeDB(db);
   }, []);
 
