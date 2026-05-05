@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "test:e2e": "detox test --configuration android.emu.debug",
+    "test:e2e": "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk} detox test --configuration android.emu.debug",
     "test:e2e:build": "detox build --configuration android.emu.debug",
     "test:e2e:ci": "detox test --configuration android.emu.release --cleanup",
     "build:android": "cd android && ./gradlew assembleRelease",

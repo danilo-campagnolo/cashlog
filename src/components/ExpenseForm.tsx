@@ -228,6 +228,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
             {filteredSuggestions.map(s => (
               <TouchableOpacity
                 key={s}
+                testID="suggestion-chip"
                 style={chipStyle}
                 onPress={() => handleSuggestionPress(s)}>
                 <Text style={chipTextStyle}>{s}</Text>

@@ -53,7 +53,7 @@ describe('Widget Deep Linking', () => {
     await TestHelpers.waitForDatabaseSync();
 
     /* Verify transaction created */
-    await Matchers.expectTransactionToExist('Widget Expense', '-$15.00');
+    await Matchers.expectTransactionToExist('Widget Expense', '-15.00€');
   });
 
   it('should allow adding income after deep link from widget', async () => {
@@ -75,7 +75,7 @@ describe('Widget Deep Linking', () => {
     await TestHelpers.waitForDatabaseSync();
 
     /* Verify transaction created */
-    await Matchers.expectTransactionToExist('Widget Income', '+$100.00');
+    await Matchers.expectTransactionToExist('Widget Income', '+100.00€');
   });
 
   it('should handle invalid deep link gracefully', async () => {
@@ -132,8 +132,8 @@ describe('Widget Deep Linking', () => {
     await TestHelpers.waitForDatabaseSync();
 
     /* Both should be income */
-    await Matchers.expectTransactionToExist('First Income', '+$50.00');
-    await Matchers.expectTransactionToExist('Second Income', '+$25.00');
+    await Matchers.expectTransactionToExist('First Income', '+50.00€');
+    await Matchers.expectTransactionToExist('Second Income', '+25.00€');
   });
 
   it('should handle rapid widget button presses', async () => {

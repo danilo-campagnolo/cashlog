@@ -1,88 +1,54 @@
 /* Helper utilities for E2E tests */
 
 export class TestHelpers {
-  /* Wait for element to be visible with retry logic */
   static async waitForElement(
-    element: Detox.NativeElement,
+    el: Detox.NativeElement,
     timeout: number = 10000
   ): Promise<void> {
-    await waitFor(element)
-      .toBeVisible()
-      .withTimeout(timeout);
+    await waitFor(el).toBeVisible().withTimeout(timeout);
   }
 
-  /* Scroll to element if not visible */
-  static async scrollToElement(
-    scrollView: Detox.NativeElement,
-    element: Detox.IndexableNativeElement,
-    direction: 'down' | 'up' = 'down'
-  ): Promise<void> {
-    await waitFor(element)
-      .toBeVisible()
-      .whileElement(by.id(scrollView))
-      .scroll(100, direction);
-  }
-
-  /* Type text with delay to ensure proper input */
   static async typeText(
-    element: Detox.NativeElement,
+    el: Detox.NativeElement,
     text: string
   ): Promise<void> {
-    await element.tap();
-    await element.typeText(text);
+    await el.tap();
+    await el.typeText(text);
   }
 
-  /* Clear and type new text */
   static async clearAndTypeText(
-    element: Detox.NativeElement,
+    el: Detox.NativeElement,
     text: string
   ): Promise<void> {
-    await element.tap();
-    await element.clearText();
-    await element.typeText(text);
+    await el.tap();
+    await el.clearText();
+    await el.typeText(text);
   }
 
-  /* Take screenshot with custom name */
   static async takeScreenshot(name: string): Promise<void> {
     await device.takeScreenshot(name);
   }
 
-  /* Reload React Native app */
   static async reloadApp(): Promise<void> {
     await device.reloadReactNative();
   }
 
-  /* Launch app with specific URL (for deep linking tests) */
   static async launchWithUrl(url: string): Promise<void> {
-    await device.launchApp({
-      newInstance: true,
-      url: url,
-    });
+    await device.launchApp({ newInstance: true, url });
   }
 
-  /* Send app to background and bring back */
   static async backgroundAndResume(duration: number = 2000): Promise<void> {
     await device.sendToHome();
     await new Promise(resolve => setTimeout(resolve, duration));
     await device.launchApp({ newInstance: false });
   }
 
-  /* Get current date in readable format */
-  static getCurrentDate(): string {
-    const date = new Date();
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const day = date.getDate();
-    return `${month} ${day}`;
-  }
-
-  /* Generate random transaction data */
   static generateTransaction(type: 'income' | 'expense' = 'expense') {
     const descriptions = {
       expense: ['Groceries', 'Gas', 'Coffee', 'Lunch', 'Transport'],
       income: ['Salary', 'Freelance', 'Bonus', 'Investment', 'Gift'],
     };
     const amounts = ['10.50', '25.00', '100.00', '50.75', '15.20'];
-    
     return {
       description: descriptions[type][Math.floor(Math.random() * descriptions[type].length)],
       amount: amounts[Math.floor(Math.random() * amounts.length)],
@@ -90,40 +56,62 @@ export class TestHelpers {
     };
   }
 
-  /* Wait for database operations to complete */
   static async waitForDatabaseSync(delay: number = 500): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, delay));
   }
 }
 
 export class Matchers {
-  /* Check if balance is displayed correctly */
-  static async expectBalanceToEqual(expectedBalance: string): Promise<void> {
-    await expect(element(by.id('balance-amount'))).toHaveText(expectedBalance);
+  /* Balance card matchers — formatCurrency uses Math.abs, so no sign */
+  static async expectBalanceToEqual(expected: string): Promise<void> {
+    await expect(element(by.id('balance-amount'))).toHaveText(expected);
   }
 
-  /* Check if income total is displayed correctly */
-  static async expectIncomeToEqual(expectedIncome: string): Promise<void> {
-    await expect(element(by.id('income-amount'))).toHaveText(expectedIncome);
+  static async expectIncomeToEqual(expected: string): Promise<void> {
+    await expect(element(by.id('income-amount'))).toHaveText(expected);
   }
 
-  /* Check if expense total is displayed correctly */
-  static async expectExpenseToEqual(expectedExpense: string): Promise<void> {
-    await expect(element(by.id('expense-amount'))).toHaveText(expectedExpense);
+  static async expectExpenseToEqual(expected: string): Promise<void> {
+    await expect(element(by.id('expense-amount'))).toHaveText(expected);
   }
 
-  /* Verify transaction exists in list */
+  /* Use compound matchers with testID to avoid ambiguity with suggestion chips */
   static async expectTransactionToExist(
     description: string,
     amount: string
   ): Promise<void> {
-    await expect(element(by.text(description))).toBeVisible();
-    await expect(element(by.text(amount))).toBeVisible();
+    await expect(
+      element(by.id('transaction-item-description').and(by.text(description)))
+    ).toBeVisible();
+    await expect(
+      element(by.id('transaction-item-amount').and(by.text(amount)))
+    ).toBeVisible();
   }
 
-  /* Verify app is on main screen */
+  static async expectTransactionNotToExist(description: string): Promise<void> {
+    await expect(
+      element(by.id('transaction-item-description').and(by.text(description)))
+    ).not.toBeVisible();
+  }
+
   static async expectMainScreenVisible(): Promise<void> {
     await expect(element(by.id('app-title'))).toBeVisible();
     await expect(element(by.id('balance-card'))).toBeVisible();
+  }
+
+  static async expectEmptyState(): Promise<void> {
+    await expect(element(by.id('empty-state-message'))).toBeVisible();
+  }
+
+  static async expectSuggestionChipVisible(text: string): Promise<void> {
+    await expect(
+      element(by.id('suggestion-chip').and(by.text(text)))
+    ).toBeVisible();
+  }
+
+  static async expectSuggestionChipNotVisible(text: string): Promise<void> {
+    await expect(
+      element(by.id('suggestion-chip').and(by.text(text)))
+    ).not.toBeVisible();
   }
 }

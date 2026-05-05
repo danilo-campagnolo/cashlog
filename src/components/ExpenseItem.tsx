@@ -74,12 +74,12 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
   return (
     <View testID={`transaction-item-${id}`} style={cardStyle}>
       <View style={styles.textBlock}>
-        <Text style={titleStyle}>{description}</Text>
+        <Text testID="transaction-item-description" style={titleStyle}>{description}</Text>
         <Text style={dateStyle}>{formattedDate}</Text>
       </View>
       <View style={styles.buttons}>
-        <Text style={amountStyle}>{formattedAmount}</Text>
-        <TouchableOpacity testID={`button-delete-${id}`} onPress={handleDelete} style={styles.deleteButton}>
+        <Text testID="transaction-item-amount" style={amountStyle}>{formattedAmount}</Text>
+        <TouchableOpacity testID="button-delete" onPress={handleDelete} style={styles.deleteButton}>
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>

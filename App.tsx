@@ -94,7 +94,7 @@ const ListHeader = memo(
           Recent Transactions
         </Text>
         {hasTransactions && (
-          <TouchableOpacity onPress={onClearAll}>
+          <TouchableOpacity testID="button-clear-all" onPress={onClearAll}>
             <Text style={styles.clearAllText}>Clear all</Text>
           </TouchableOpacity>
         )}
@@ -312,6 +312,7 @@ function App(): React.JSX.Element {
   const emptyComponent = useMemo(
     () => (
       <Text
+        testID="empty-state-message"
         style={[
           styles.emptyText,
           {color: getColor(Colors.text.secondary, isDarkMode)},
