@@ -15,11 +15,13 @@ import {
 import {
   getDBConnection,
   createExpensesTable,
+  createDescriptionsTable,
   addExpense,
   getExpenses,
   updateExpense,
   deleteExpense,
   deleteAllExpenses,
+  incrementDescription,
   getTopDescriptions,
   closeDB,
 } from './database/database';
@@ -127,6 +129,7 @@ function App(): React.JSX.Element {
   const loadData = useCallback(async () => {
     const db = await getDBConnection();
     await createExpensesTable(db);
+    await createDescriptionsTable(db);
     const [allExpenses, topDescriptions] = await Promise.all([
       getExpenses(db),
       getTopDescriptions(db),
@@ -229,6 +232,7 @@ function App(): React.JSX.Element {
           type,
         );
       }
+      await incrementDescription(db, description);
       const [allExpenses, topDescriptions] = await Promise.all([
         getExpenses(db),
         getTopDescriptions(db),
