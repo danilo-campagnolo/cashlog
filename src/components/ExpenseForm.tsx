@@ -26,7 +26,7 @@ interface ExpenseFormProps {
   ) => void;
   initialType?: 'income' | 'expense';
   focusTrigger?: number;
-  suggestions?: string[];
+  suggestions?: Record<'income' | 'expense', string[]>;
   editExpense?: {
     description: string;
     amount: number;
@@ -39,7 +39,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onAddExpense,
   initialType = 'expense',
   focusTrigger,
-  suggestions = [],
+  suggestions = {income: [], expense: []},
   editExpense,
 }) => {
   const [description, setDescription] = useState<string>('');
@@ -72,16 +72,17 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   }, [focusTrigger]);
 
   const filteredSuggestions = useMemo(() => {
+    const pool = suggestions[type];
     const trimmed = description.trim().toLowerCase();
     if (!trimmed) {
-      return suggestions.slice(0, 5);
+      return pool.slice(0, 5);
     }
-    return suggestions
+    return pool
       .filter(
         s => s.toLowerCase().includes(trimmed) && s.toLowerCase() !== trimmed,
       )
       .slice(0, 5);
-  }, [description, suggestions]);
+  }, [description, suggestions, type]);
 
   const handleSuggestionPress = useCallback((s: string) => {
     setDescription(s);

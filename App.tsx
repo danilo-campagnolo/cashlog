@@ -58,7 +58,7 @@ const ListHeader = memo(
     defaultType: 'income' | 'expense';
     focusTrigger: number;
     hasTransactions: boolean;
-    suggestions: string[];
+    suggestions: Record<'income' | 'expense', string[]>;
   }) => (
     <>
       <View style={styles.header}>
@@ -110,7 +110,9 @@ function App(): React.JSX.Element {
     'expense',
   );
   const [focusTrigger, setFocusTrigger] = useState(0);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<
+    Record<'income' | 'expense', string[]>
+  >({income: [], expense: []});
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -130,12 +132,13 @@ function App(): React.JSX.Element {
     const db = await getDBConnection();
     await createExpensesTable(db);
     await createDescriptionsTable(db);
-    const [allExpenses, topDescriptions] = await Promise.all([
+    const [allExpenses, incomeDesc, expenseDesc] = await Promise.all([
       getExpenses(db),
-      getTopDescriptions(db),
+      getTopDescriptions(db, 'income'),
+      getTopDescriptions(db, 'expense'),
     ]);
     setExpenses(allExpenses);
-    setSuggestions(topDescriptions);
+    setSuggestions({income: incomeDesc, expense: expenseDesc});
     await closeDB(db);
   }, []);
 
@@ -232,13 +235,14 @@ function App(): React.JSX.Element {
           type,
         );
       }
-      await incrementDescription(db, description);
-      const [allExpenses, topDescriptions] = await Promise.all([
+      await incrementDescription(db, description, type);
+      const [allExpenses, incomeDesc, expenseDesc] = await Promise.all([
         getExpenses(db),
-        getTopDescriptions(db),
+        getTopDescriptions(db, 'income'),
+        getTopDescriptions(db, 'expense'),
       ]);
       setExpenses(allExpenses);
-      setSuggestions(topDescriptions);
+      setSuggestions({income: incomeDesc, expense: expenseDesc});
       await closeDB(db);
     },
     [editId],
@@ -247,21 +251,25 @@ function App(): React.JSX.Element {
   const handleDeleteExpense = useCallback(async (id: number) => {
     const db = await getDBConnection();
     await deleteExpense(db, id);
-    const [allExpenses, topDescriptions] = await Promise.all([
+    const [allExpenses, incomeDesc, expenseDesc] = await Promise.all([
       getExpenses(db),
-      getTopDescriptions(db),
+      getTopDescriptions(db, 'income'),
+      getTopDescriptions(db, 'expense'),
     ]);
     setExpenses(allExpenses);
-    setSuggestions(topDescriptions);
+    setSuggestions({income: incomeDesc, expense: expenseDesc});
     await closeDB(db);
   }, []);
 
   const handleClearAll = useCallback(async () => {
     const db = await getDBConnection();
     await deleteAllExpenses(db);
-    const topDescriptions = await getTopDescriptions(db);
+    const [incomeDesc, expenseDesc] = await Promise.all([
+      getTopDescriptions(db, 'income'),
+      getTopDescriptions(db, 'expense'),
+    ]);
     setExpenses([]);
-    setSuggestions(topDescriptions);
+    setSuggestions({income: incomeDesc, expense: expenseDesc});
     await closeDB(db);
   }, []);
 

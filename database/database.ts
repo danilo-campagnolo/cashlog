@@ -46,23 +46,34 @@ export const createDescriptionsTable = async (db: SQLite.SQLiteDatabase) => {
     return;
   }
 
-  await db.executeSql(`
-    CREATE TABLE IF NOT EXISTS Descriptions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      description TEXT UNIQUE NOT NULL,
-      count INTEGER NOT NULL DEFAULT 1
-    )
-  `);
+  /* Migrate: if the type column is missing, recreate the table */
+  const info = await db.executeSql('PRAGMA table_info(Descriptions)');
+  const rows = info[0]?.rows;
+  let hasTypeColumn = false;
+  if (rows) {
+    for (let i = 0; i < rows.length; i++) {
+      if (rows.item(i).name === 'type') {
+        hasTypeColumn = true;
+        break;
+      }
+    }
+  }
 
-  /* Seed from existing Expenses on first creation */
-  const countResult = await db.executeSql(
-    'SELECT COUNT(*) as cnt FROM Descriptions',
-  );
-  const existingCount = countResult[0].rows.item(0).cnt as number;
-  if (existingCount === 0) {
+  if (!hasTypeColumn) {
+    await db.executeSql('DROP TABLE IF EXISTS Descriptions');
     await db.executeSql(`
-      INSERT OR IGNORE INTO Descriptions (description, count)
-      SELECT description, COUNT(*) FROM Expenses GROUP BY description
+      CREATE TABLE Descriptions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT NOT NULL,
+        type TEXT NOT NULL,
+        count INTEGER NOT NULL DEFAULT 1,
+        UNIQUE(description, type)
+      )
+    `);
+    /* Seed from existing Expenses */
+    await db.executeSql(`
+      INSERT OR IGNORE INTO Descriptions (description, type, count)
+      SELECT description, type, COUNT(*) FROM Expenses GROUP BY description, type
     `);
   }
 
@@ -152,24 +163,26 @@ export const deleteAllExpenses = async (db: SQLite.SQLiteDatabase) => {
 export const incrementDescription = async (
   db: SQLite.SQLiteDatabase,
   description: string,
+  type: 'income' | 'expense',
 ) => {
   await db.executeSql(
-    'INSERT OR IGNORE INTO Descriptions (description, count) VALUES (?, 0)',
-    [description],
+    'INSERT OR IGNORE INTO Descriptions (description, type, count) VALUES (?, ?, 0)',
+    [description, type],
   );
   await db.executeSql(
-    'UPDATE Descriptions SET count = count + 1 WHERE description = ?',
-    [description],
+    'UPDATE Descriptions SET count = count + 1 WHERE description = ? AND type = ?',
+    [description, type],
   );
 };
 
 export const getTopDescriptions = async (
   db: SQLite.SQLiteDatabase,
+  type: 'income' | 'expense',
   limit: number = 10,
 ): Promise<string[]> => {
   const results = await db.executeSql(
-    'SELECT description FROM Descriptions ORDER BY count DESC LIMIT ?',
-    [limit],
+    'SELECT description FROM Descriptions WHERE type = ? ORDER BY count DESC LIMIT ?',
+    [type, limit],
   );
   const descriptions: string[] = [];
   if (results.length > 0) {
