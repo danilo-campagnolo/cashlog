@@ -20,6 +20,7 @@ import {
   updateExpense,
   deleteExpense,
   deleteAllExpenses,
+  getTopDescriptions,
   closeDB,
 } from './database/database';
 import ExpenseForm from './src/components/ExpenseForm';
@@ -40,6 +41,7 @@ const ListHeader = memo(
     defaultType,
     focusTrigger,
     hasTransactions,
+    suggestions,
   }: {
     isDarkMode: boolean;
     totalBalance: number;
@@ -54,6 +56,7 @@ const ListHeader = memo(
     defaultType: 'income' | 'expense';
     focusTrigger: number;
     hasTransactions: boolean;
+    suggestions: string[];
   }) => (
     <>
       <View style={styles.header}>
@@ -77,6 +80,7 @@ const ListHeader = memo(
         onAddExpense={onAddExpense}
         initialType={defaultType}
         focusTrigger={focusTrigger}
+        suggestions={suggestions}
       />
 
       <View style={styles.sectionHeader}>
@@ -104,6 +108,7 @@ function App(): React.JSX.Element {
     'expense',
   );
   const [focusTrigger, setFocusTrigger] = useState(0);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -122,8 +127,12 @@ function App(): React.JSX.Element {
   const loadData = useCallback(async () => {
     const db = await getDBConnection();
     await createExpensesTable(db);
-    const allExpenses = await getExpenses(db);
+    const [allExpenses, topDescriptions] = await Promise.all([
+      getExpenses(db),
+      getTopDescriptions(db),
+    ]);
     setExpenses(allExpenses);
+    setSuggestions(topDescriptions);
     await closeDB(db);
   }, []);
 
@@ -220,8 +229,12 @@ function App(): React.JSX.Element {
           type,
         );
       }
-      const allExpenses = await getExpenses(db);
+      const [allExpenses, topDescriptions] = await Promise.all([
+        getExpenses(db),
+        getTopDescriptions(db),
+      ]);
       setExpenses(allExpenses);
+      setSuggestions(topDescriptions);
       await closeDB(db);
     },
     [editId],
@@ -230,8 +243,12 @@ function App(): React.JSX.Element {
   const handleDeleteExpense = useCallback(async (id: number) => {
     const db = await getDBConnection();
     await deleteExpense(db, id);
-    const allExpenses = await getExpenses(db);
+    const [allExpenses, topDescriptions] = await Promise.all([
+      getExpenses(db),
+      getTopDescriptions(db),
+    ]);
     setExpenses(allExpenses);
+    setSuggestions(topDescriptions);
     await closeDB(db);
   }, []);
 
@@ -239,6 +256,7 @@ function App(): React.JSX.Element {
     const db = await getDBConnection();
     await deleteAllExpenses(db);
     setExpenses([]);
+    setSuggestions([]);
     await closeDB(db);
   }, []);
 
@@ -291,6 +309,7 @@ function App(): React.JSX.Element {
         defaultType={defaultType}
         focusTrigger={focusTrigger}
         hasTransactions={expenses.length > 0}
+        suggestions={suggestions}
       />
     ),
     [
@@ -303,6 +322,7 @@ function App(): React.JSX.Element {
       defaultType,
       focusTrigger,
       expenses.length,
+      suggestions,
     ],
   );
 

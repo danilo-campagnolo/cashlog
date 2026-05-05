@@ -120,6 +120,28 @@ export const deleteAllExpenses = async (db: SQLite.SQLiteDatabase) => {
   await db.executeSql('DELETE FROM Expenses');
 };
 
+export const getTopDescriptions = async (
+  db: SQLite.SQLiteDatabase,
+  limit: number = 10,
+): Promise<string[]> => {
+  const query = `
+    SELECT description, COUNT(*) as cnt
+    FROM Expenses
+    GROUP BY LOWER(description)
+    ORDER BY cnt DESC
+    LIMIT ?
+  `;
+  const results = await db.executeSql(query, [limit]);
+  const descriptions: string[] = [];
+  if (results.length > 0) {
+    const rows = results[0].rows;
+    for (let i = 0; i < rows.length; i++) {
+      descriptions.push(rows.item(i).description as string);
+    }
+  }
+  return descriptions;
+};
+
 /* No-op: connection is kept open as singleton */
 export const closeDB = async (_db: SQLite.SQLiteDatabase) => {
   /* Do nothing - we keep the connection open for the app lifetime */

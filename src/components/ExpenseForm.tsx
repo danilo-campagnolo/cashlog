@@ -9,6 +9,7 @@ import React, {
 import {
   View,
   TextInput,
+  ScrollView,
   StyleSheet,
   useColorScheme,
   TouchableOpacity,
@@ -25,6 +26,7 @@ interface ExpenseFormProps {
   ) => void;
   initialType?: 'income' | 'expense';
   focusTrigger?: number;
+  suggestions?: string[];
   editExpense?: {
     description: string;
     amount: number;
@@ -37,11 +39,13 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onAddExpense,
   initialType = 'expense',
   focusTrigger,
+  suggestions = [],
   editExpense,
 }) => {
   const [description, setDescription] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [descriptionFocused, setDescriptionFocused] = useState(false);
   const descriptionRef = useRef<TextInput>(null);
 
   const isDarkMode = useColorScheme() === 'dark';
@@ -67,6 +71,34 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
     const t = setTimeout(() => descriptionRef.current?.focus(), 150);
     return () => clearTimeout(t);
   }, [focusTrigger]);
+
+  const filteredSuggestions = useMemo(() => {
+    if (!descriptionFocused) {
+      return [];
+    }
+    const trimmed = description.trim().toLowerCase();
+    if (!trimmed) {
+      return suggestions.slice(0, 5);
+    }
+    return suggestions
+      .filter(
+        s => s.toLowerCase().includes(trimmed) && s.toLowerCase() !== trimmed,
+      )
+      .slice(0, 5);
+  }, [description, descriptionFocused, suggestions]);
+
+  const handleDescriptionFocus = useCallback(
+    () => setDescriptionFocused(true),
+    [],
+  );
+  const handleDescriptionBlur = useCallback(() => {
+    setTimeout(() => setDescriptionFocused(false), 150);
+  }, []);
+
+  const handleSuggestionPress = useCallback((s: string) => {
+    setDescription(s);
+    setDescriptionFocused(false);
+  }, []);
 
   const handleAddExpense = useCallback(() => {
     if (description.trim() && amount.trim()) {
@@ -180,7 +212,26 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
           placeholderTextColor={placeholderColor}
           selectionColor={selectionColor}
           onChangeText={setDescription}
+          onFocus={handleDescriptionFocus}
+          onBlur={handleDescriptionBlur}
         />
+        {filteredSuggestions.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            style={styles.suggestionsRow}
+            contentContainerStyle={styles.suggestionsContent}>
+            {filteredSuggestions.map(s => (
+              <TouchableOpacity
+                key={s}
+                style={styles.chip}
+                onPress={() => handleSuggestionPress(s)}>
+                <Text style={styles.chipText}>{s}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
       </View>
 
       <View style={styles.inputContainer}>
@@ -248,6 +299,23 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 16,
+  },
+  suggestionsRow: {
+    marginTop: 8,
+  },
+  suggestionsContent: {
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: Colors.expenseLight,
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: Colors.expense,
   },
   input: {
     height: 56,
