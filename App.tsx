@@ -296,6 +296,19 @@ function App(): React.JSX.Element {
   /* Memoize keyExtractor */
   const keyExtractor = useCallback((item: Expense) => item.id.toString(), []);
 
+  const emptyComponent = useMemo(
+    () => (
+      <Text
+        style={[
+          styles.emptyText,
+          {color: getColor(Colors.text.secondary, isDarkMode)},
+        ]}>
+        No transactions yet
+      </Text>
+    ),
+    [isDarkMode],
+  );
+
   /* Memoize header component */
   const listHeaderComponent = useMemo(
     () => (
@@ -338,6 +351,7 @@ function App(): React.JSX.Element {
           keyExtractor={keyExtractor}
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={listHeaderComponent}
+          ListEmptyComponent={emptyComponent}
           contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
           /* Performance optimizations */
@@ -377,6 +391,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 8,
+    fontSize: 15,
   },
   clearAllText: {
     fontSize: 14,
