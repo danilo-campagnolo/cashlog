@@ -34,10 +34,12 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
     [isExpense, amount],
   );
 
-  const formattedDate = useMemo(
-    () => new Date(date).toLocaleDateString(),
-    [date],
-  );
+  const formattedDate = useMemo(() => {
+    const d = new Date(date);
+    const datePart = d.toLocaleDateString();
+    const timePart = d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    return `${datePart} · ${timePart}`;
+  }, [date]);
 
   /* Memoize delete handler to avoid creating new function on each render */
   const handleDelete = useCallback(() => {
