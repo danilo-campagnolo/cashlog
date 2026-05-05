@@ -316,6 +316,7 @@ function App(): React.JSX.Element {
           data={expenses}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
+          keyboardShouldPersistTaps="handled"
           ListHeaderComponent={listHeaderComponent}
           contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
