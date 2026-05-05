@@ -122,6 +122,12 @@ android {
         }
     }
 
+    packaging {
+        jniLibs {
+            useLegacyPackaging false
+        }
+    }
+
     /* Rename APK to cashlog-{version}.apk */
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
