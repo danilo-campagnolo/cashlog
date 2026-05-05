@@ -116,6 +116,10 @@ export const deleteExpense = async (db: SQLite.SQLiteDatabase, id: number) => {
   await db.executeSql(query, [id]);
 };
 
+export const deleteAllExpenses = async (db: SQLite.SQLiteDatabase) => {
+  await db.executeSql('DELETE FROM Expenses');
+};
+
 /* No-op: connection is kept open as singleton */
 export const closeDB = async (_db: SQLite.SQLiteDatabase) => {
   /* Do nothing - we keep the connection open for the app lifetime */

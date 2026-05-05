@@ -1,4 +1,11 @@
-import React, {useState, useEffect, memo, useCallback, useMemo} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  memo,
+  useCallback,
+  useMemo,
+} from 'react';
 import {
   View,
   TextInput,
@@ -17,6 +24,7 @@ interface ExpenseFormProps {
     type: 'income' | 'expense',
   ) => void;
   initialType?: 'income' | 'expense';
+  focusTrigger?: number;
   editExpense?: {
     description: string;
     amount: number;
@@ -28,11 +36,13 @@ interface ExpenseFormProps {
 const ExpenseForm: React.FC<ExpenseFormProps> = ({
   onAddExpense,
   initialType = 'expense',
+  focusTrigger,
   editExpense,
 }) => {
   const [description, setDescription] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [type, setType] = useState<'income' | 'expense'>('expense');
+  const descriptionRef = useRef<TextInput>(null);
 
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -49,6 +59,14 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
       setType(initialType);
     }
   }, [initialType, editExpense]);
+
+  useEffect(() => {
+    if (!focusTrigger) {
+      return;
+    }
+    const t = setTimeout(() => descriptionRef.current?.focus(), 150);
+    return () => clearTimeout(t);
+  }, [focusTrigger]);
 
   const handleAddExpense = useCallback(() => {
     if (description.trim() && amount.trim()) {
@@ -109,29 +127,52 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({
     ];
   }, [type]);
 
-  const expenseTextStyle = useMemo(() => [
-    styles.toggleText,
-    {color: type === 'expense' ? Colors.white : getColor(Colors.text.tertiary, isDarkMode)},
-  ], [type, isDarkMode]);
+  const expenseTextStyle = useMemo(
+    () => [
+      styles.toggleText,
+      {
+        color:
+          type === 'expense'
+            ? Colors.white
+            : getColor(Colors.text.tertiary, isDarkMode),
+      },
+    ],
+    [type, isDarkMode],
+  );
 
-  const incomeTextStyle = useMemo(() => [
-    styles.toggleText,
-    {color: type === 'income' ? Colors.white : getColor(Colors.text.tertiary, isDarkMode)},
-  ], [type, isDarkMode]);
+  const incomeTextStyle = useMemo(
+    () => [
+      styles.toggleText,
+      {
+        color:
+          type === 'income'
+            ? Colors.white
+            : getColor(Colors.text.tertiary, isDarkMode),
+      },
+    ],
+    [type, isDarkMode],
+  );
 
   return (
     <View testID="expense-form" style={cardStyle}>
       <View style={styles.toggleRow}>
-        <TouchableOpacity testID="toggle-expense" style={expenseToggleStyle} onPress={handleSetExpense}>
+        <TouchableOpacity
+          testID="toggle-expense"
+          style={expenseToggleStyle}
+          onPress={handleSetExpense}>
           <Text style={expenseTextStyle}>Expense</Text>
         </TouchableOpacity>
-        <TouchableOpacity testID="toggle-income" style={incomeToggleStyle} onPress={handleSetIncome}>
+        <TouchableOpacity
+          testID="toggle-income"
+          style={incomeToggleStyle}
+          onPress={handleSetIncome}>
           <Text style={incomeTextStyle}>Income</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.inputContainer}>
         <TextInput
+          ref={descriptionRef}
           testID="input-description"
           style={inputStyle}
           value={description}

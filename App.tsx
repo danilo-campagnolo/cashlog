@@ -7,6 +7,7 @@ import {
   StatusBar,
   useColorScheme,
   View,
+  TouchableOpacity,
   AppState,
   AppStateStatus,
   Linking,
@@ -18,6 +19,7 @@ import {
   getExpenses,
   updateExpense,
   deleteExpense,
+  deleteAllExpenses,
   closeDB,
 } from './database/database';
 import ExpenseForm from './src/components/ExpenseForm';
@@ -27,57 +29,92 @@ import {Colors, getColor} from './src/constants';
 import type {Expense} from './src/types/expense';
 
 /* Memoized header component to prevent unnecessary re-renders */
-const ListHeader = memo(({
-  isDarkMode,
-  totalBalance,
-  totalIncome,
-  totalExpense,
-  onAddExpense,
-  defaultType,
-}: {
-  isDarkMode: boolean;
-  totalBalance: number;
-  totalIncome: number;
-  totalExpense: number;
-  onAddExpense: (description: string, amount: string, type: 'income' | 'expense') => void;
-  defaultType: 'income' | 'expense';
-}) => (
-  <>
-    <View style={styles.header}>
-      <Text testID="app-title" style={[styles.title, {color: getColor(Colors.text.primary, isDarkMode)}]}>
-        Cashlog
-      </Text>
-    </View>
+const ListHeader = memo(
+  ({
+    isDarkMode,
+    totalBalance,
+    totalIncome,
+    totalExpense,
+    onAddExpense,
+    onClearAll,
+    defaultType,
+    focusTrigger,
+    hasTransactions,
+  }: {
+    isDarkMode: boolean;
+    totalBalance: number;
+    totalIncome: number;
+    totalExpense: number;
+    onAddExpense: (
+      description: string,
+      amount: string,
+      type: 'income' | 'expense',
+    ) => void;
+    onClearAll: () => void;
+    defaultType: 'income' | 'expense';
+    focusTrigger: number;
+    hasTransactions: boolean;
+  }) => (
+    <>
+      <View style={styles.header}>
+        <Text
+          testID="app-title"
+          style={[
+            styles.title,
+            {color: getColor(Colors.text.primary, isDarkMode)},
+          ]}>
+          Cashlog
+        </Text>
+      </View>
 
-    <BalanceCard
-      totalBalance={totalBalance}
-      totalIncome={totalIncome}
-      totalExpense={totalExpense}
-    />
+      <BalanceCard
+        totalBalance={totalBalance}
+        totalIncome={totalIncome}
+        totalExpense={totalExpense}
+      />
 
-    <ExpenseForm
-      onAddExpense={onAddExpense}
-      initialType={defaultType}
-    />
+      <ExpenseForm
+        onAddExpense={onAddExpense}
+        initialType={defaultType}
+        focusTrigger={focusTrigger}
+      />
 
-    <Text style={[styles.sectionTitle, {color: getColor(Colors.text.secondary, isDarkMode)}]}>
-      Recent Transactions
-    </Text>
-  </>
-));
+      <View style={styles.sectionHeader}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            {color: getColor(Colors.text.secondary, isDarkMode)},
+          ]}>
+          Recent Transactions
+        </Text>
+        {hasTransactions && (
+          <TouchableOpacity onPress={onClearAll}>
+            <Text style={styles.clearAllText}>Clear all</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </>
+  ),
+);
 
 function App(): React.JSX.Element {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [editId, setEditId] = useState<number | null>(null);
-  const [defaultType, setDefaultType] = useState<'income' | 'expense'>('expense');
+  const [defaultType, setDefaultType] = useState<'income' | 'expense'>(
+    'expense',
+  );
+  const [focusTrigger, setFocusTrigger] = useState(0);
 
   const isDarkMode = useColorScheme() === 'dark';
 
   /* Memoize background style to prevent object recreation */
-  const backgroundStyle = useMemo(() => ({
-    backgroundColor: getColor(Colors.background, isDarkMode),
-    flex: 1,
-  }), [isDarkMode]);
+  const backgroundStyle = useMemo(
+    () => ({
+      backgroundColor: getColor(Colors.background, isDarkMode),
+      flex: 1,
+    }),
+    [isDarkMode],
+  );
 
   /* Memoize content container style */
   const contentContainerStyle = useMemo(() => ({paddingBottom: 40}), []);
@@ -99,7 +136,10 @@ function App(): React.JSX.Element {
       }
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
 
     return () => {
       subscription.remove();
@@ -108,7 +148,9 @@ function App(): React.JSX.Element {
 
   useEffect(() => {
     /* Parse type parameter from deep link URL (e.g. cashlog://add?type=income) */
-    const parseTypeFromUrl = (url?: string | null): 'income' | 'expense' | null => {
+    const parseTypeFromUrl = (
+      url?: string | null,
+    ): 'income' | 'expense' | null => {
       if (!url) {
         return null;
       }
@@ -136,6 +178,7 @@ function App(): React.JSX.Element {
       const type = parseTypeFromUrl(event.url);
       if (type) {
         setDefaultType(type);
+        setFocusTrigger(Date.now());
       }
     };
 
@@ -143,6 +186,7 @@ function App(): React.JSX.Element {
       const type = parseTypeFromUrl(url);
       if (type) {
         setDefaultType(type);
+        setFocusTrigger(Date.now());
       }
     });
 
@@ -153,42 +197,48 @@ function App(): React.JSX.Element {
   }, []);
 
   /* Memoize handlers to prevent child re-renders */
-  const handleAddOrUpdateExpense = useCallback(async (
-    description: string,
-    amount: string,
-    type: 'income' | 'expense',
-  ) => {
-    const db = await getDBConnection();
-    const parsedAmount = parseFloat(amount);
-    if (editId !== null) {
-      await updateExpense(
-        db,
-        editId,
-        description,
-        parsedAmount,
-        new Date().toISOString(),
-        type,
-      );
-      setEditId(null);
-    } else {
-      await addExpense(
-        db,
-        description,
-        parsedAmount,
-        new Date().toISOString(),
-        type,
-      );
-    }
-    const allExpenses = await getExpenses(db);
-    setExpenses(allExpenses);
-    await closeDB(db);
-  }, [editId]);
+  const handleAddOrUpdateExpense = useCallback(
+    async (description: string, amount: string, type: 'income' | 'expense') => {
+      const db = await getDBConnection();
+      const parsedAmount = parseFloat(amount);
+      if (editId !== null) {
+        await updateExpense(
+          db,
+          editId,
+          description,
+          parsedAmount,
+          new Date().toISOString(),
+          type,
+        );
+        setEditId(null);
+      } else {
+        await addExpense(
+          db,
+          description,
+          parsedAmount,
+          new Date().toISOString(),
+          type,
+        );
+      }
+      const allExpenses = await getExpenses(db);
+      setExpenses(allExpenses);
+      await closeDB(db);
+    },
+    [editId],
+  );
 
   const handleDeleteExpense = useCallback(async (id: number) => {
     const db = await getDBConnection();
     await deleteExpense(db, id);
     const allExpenses = await getExpenses(db);
     setExpenses(allExpenses);
+    await closeDB(db);
+  }, []);
+
+  const handleClearAll = useCallback(async () => {
+    const db = await getDBConnection();
+    await deleteAllExpenses(db);
+    setExpenses([]);
     await closeDB(db);
   }, []);
 
@@ -211,31 +261,50 @@ function App(): React.JSX.Element {
   }, [expenses]);
 
   /* Memoize renderItem to prevent recreation on each render */
-  const renderItem = useCallback(({item}: {item: Expense}) => (
-    <ExpenseItem
-      id={item.id}
-      description={item.description}
-      amount={item.amount}
-      date={item.date}
-      type={item.type}
-      onDelete={handleDeleteExpense}
-    />
-  ), [handleDeleteExpense]);
+  const renderItem = useCallback(
+    ({item}: {item: Expense}) => (
+      <ExpenseItem
+        id={item.id}
+        description={item.description}
+        amount={item.amount}
+        date={item.date}
+        type={item.type}
+        onDelete={handleDeleteExpense}
+      />
+    ),
+    [handleDeleteExpense],
+  );
 
   /* Memoize keyExtractor */
   const keyExtractor = useCallback((item: Expense) => item.id.toString(), []);
 
   /* Memoize header component */
-  const listHeaderComponent = useMemo(() => (
-    <ListHeader
-      isDarkMode={isDarkMode}
-      totalBalance={totalBalance}
-      totalIncome={totalIncome}
-      totalExpense={totalExpense}
-      onAddExpense={handleAddOrUpdateExpense}
-      defaultType={defaultType}
-    />
-  ), [isDarkMode, totalBalance, totalIncome, totalExpense, handleAddOrUpdateExpense, defaultType]);
+  const listHeaderComponent = useMemo(
+    () => (
+      <ListHeader
+        isDarkMode={isDarkMode}
+        totalBalance={totalBalance}
+        totalIncome={totalIncome}
+        totalExpense={totalExpense}
+        onAddExpense={handleAddOrUpdateExpense}
+        onClearAll={handleClearAll}
+        defaultType={defaultType}
+        focusTrigger={focusTrigger}
+        hasTransactions={expenses.length > 0}
+      />
+    ),
+    [
+      isDarkMode,
+      totalBalance,
+      totalIncome,
+      totalExpense,
+      handleAddOrUpdateExpense,
+      handleClearAll,
+      defaultType,
+      focusTrigger,
+      expenses.length,
+    ],
+  );
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -277,11 +346,21 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.5,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 16,
-    marginTop: 8,
+  },
+  clearAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.expense,
   },
 });
 
